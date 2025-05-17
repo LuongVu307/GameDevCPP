@@ -1,0 +1,6 @@
+# Ignore all object and executable files
+*.exe
+*.obj
+
+# Ignore folder called SFML3
+SFML3
