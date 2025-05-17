@@ -8,24 +8,34 @@ class Circle
     std::string name;
     sf::Color color;
     sf::Vector2f velocity;
+    const sf::Font& font;
+    sf::Text text;
     float radius;
 
 public: 
     Circle(std::string name, float radius, sf::Vector2f position, 
-        sf::Vector2f velocity, sf::Color color) :
+        sf::Vector2f velocity, sf::Color color, sf::Font& font) :
         name(name), radius(radius),
         velocity(velocity),
-        color(color)
+        color(color),
+        font(font),
+        text(font, name, 18)
     {
         circle.setPosition(position);
         circle.setFillColor(color);
         circle.setOrigin({radius, radius});
         circle.setRadius(radius);
+
+        text.setFillColor(sf::Color::White);
+
+        sf::FloatRect textRect = text.getLocalBounds();
+        text.setOrigin({textRect.size.x/2, textRect.size.y});
     }
 
     void update(float dt)
     {
         circle.move(velocity * dt);
+        text.setPosition(circle.getPosition());
         bool velX_sign = velocity.x > 0, velY_sign =  velocity.y > 0;
 
 
@@ -44,6 +54,7 @@ public:
     }
 
     const sf::CircleShape& getCircle() const {return circle; }
+    const sf::Text& getText() const {return text; }
 
 };
 
@@ -53,15 +64,23 @@ int main(int argc, char * argv[])
 {
     unsigned int _WIDTH = 1280, _HEIGHT = 720;
     unsigned int FPS = 120;
+
     sf::Clock clock;
     sf::Time lastTime = clock.getElapsedTime();
+
+    sf::Font font;
+    if (!font.openFromFile("tech.ttf"))
+    {
+        std::cout << "Cannot find font 'tech.ttf' \n";
+        return 1;
+    }
 
 
     sf::RenderWindow window(sf::VideoMode({_WIDTH, _HEIGHT}), "Assignment 1");
 
-    Circle CGreen("CGreen", 50., {100., 100.}, {-3., 2.}, sf::Color{0, 255, 0});
-    Circle CBlue("CGreen", 100., {200., 200.}, {2., 4.}, sf::Color{0, 0, 255});
-    Circle CPurple("CGreen", 75., {300., 300.}, {-2., -1.}, sf::Color{255, 0, 255});
+    Circle CGreen("CGreen", 50., {100., 100.}, {-3., 2.}, sf::Color{0, 255, 0}, font);
+    Circle CBlue("CBlue", 100., {200., 200.}, {2., 4.}, sf::Color{0, 0, 255}, font);
+    Circle CPurple("CPurple", 75., {300., 300.}, {-2., -1.}, sf::Color{255, 0, 255}, font);
     
 
     window.setFramerateLimit(FPS);
@@ -91,6 +110,9 @@ int main(int argc, char * argv[])
         window.draw(CBlue.getCircle());
         window.draw(CPurple.getCircle());
 
+        window.draw(CGreen.getText());
+        window.draw(CBlue.getText());
+        window.draw(CPurple.getText());
 
 
         window.display();
