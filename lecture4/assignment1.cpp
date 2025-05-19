@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
+#include <memory>
+
 
 class CustomShape
 {
@@ -13,6 +15,7 @@ protected:
     sf::Vector2f position;
 
     virtual const sf::Shape& getShape() const = 0;
+
 
 
 public:
@@ -29,6 +32,7 @@ public:
 
 
     virtual const sf::Text& getText() const {return text; }
+    virtual void customUpdate(float dt) = 0;
     virtual void draw(sf::RenderWindow& window) const
     {
         window.draw(getShape());
@@ -58,7 +62,7 @@ public:
         text.setPosition(position);
     }
 
-    void update(float dt)
+    void customUpdate(float dt) override
     {
         shape.move(velocity * dt);
         text.setPosition(shape.getPosition());
@@ -106,7 +110,7 @@ public:
         text.setPosition(position);
         }
 
-    void update(float dt)
+    void customUpdate(float dt) override
     {
         shape.move(velocity * dt);
         text.setPosition(shape.getPosition());
@@ -154,13 +158,16 @@ int main(int argc, char * argv[])
 
     sf::RenderWindow window(sf::VideoMode({_WIDTH, _HEIGHT}), "Assignment 1");
 
-    Circle CGreen("CGreen", 50., {100., 100.}, {-3., 2.}, sf::Color{0, 255, 0}, font);
-    Circle CBlue("CBlue", 100., {200., 200.}, {2., 4.}, sf::Color{0, 0, 255}, font);
-    Circle CPurple("CPurple", 75., {300., 300.}, {-2., -1.}, sf::Color{255, 0, 255}, font);
+    std::vector<std::unique_ptr<CustomShape>> shapes;
 
-    Rectangle RRed("RRed", 25, 50, {300, 300}, {4, 4}, sf::Color{255, 0, 0}, font);
-    Rectangle RGrey("RGrey", 100, 50, {300, 250}, {-2, 2}, sf::Color{100, 100, 100}, font);
-    Rectangle RTeal("RTeal", 100, 100, {25, 100}, {-2, -2}, sf::Color{255, 255, 100}, font);
+
+    shapes.push_back(std::make_unique<Circle>(std::string("CGreen"), 50.f, sf::Vector2f(100.f, 100.f), sf::Vector2f(-3.f, 2.f), sf::Color{0, 255, 0}, font));
+    shapes.push_back(std::make_unique<Circle>(std::string("CBlue"), 100.f, sf::Vector2f(200.f, 200.f), sf::Vector2f(2.f, 4.f), sf::Color{0, 0, 255}, font));
+    shapes.push_back(std::make_unique<Circle>(std::string("CPurple"), 75.f, sf::Vector2f(300.f, 300.f), sf::Vector2f(-2.f, -1.f), sf::Color{0255, 0, 255}, font));
+    shapes.push_back(std::make_unique<Rectangle>(std::string("RRed"), 25.f, 50.f, sf::Vector2f(300.f, 300.f), sf::Vector2f(4.f, 4.f), sf::Color{255, 0, 0}, font));
+    shapes.push_back(std::make_unique<Rectangle>(std::string("RGrey"), 100.f, 50.f, sf::Vector2f(300.f, 250.f), sf::Vector2f(-2.f, 2.f), sf::Color{100, 100, 100}, font));
+    shapes.push_back(std::make_unique<Rectangle>(std::string("RTeal"), 100.f, 100.f, sf::Vector2f(25.f, 100.f), sf::Vector2f(-2.f, -2.f), sf::Color{255, 255, 100}, font));
+    
 
 
     window.setFramerateLimit(FPS);
@@ -172,12 +179,9 @@ int main(int argc, char * argv[])
         float dt = (currentTime - lastTime).asSeconds() * FPS;
         lastTime = currentTime;
 
-        CGreen.update(dt);
-        CBlue.update(dt);
-        CPurple.update(dt);
-        RRed.update(dt);
-        RGrey.update(dt);
-        RTeal.update(dt);
+        for (auto& shape : shapes) {
+            shape->customUpdate(dt); 
+        }
 
 
         while (std::optional event = window.pollEvent())
@@ -190,12 +194,9 @@ int main(int argc, char * argv[])
 
         window.clear(sf::Color(0, 0, 0));
 
-        CGreen.draw(window);
-        CBlue.draw(window);
-        CPurple.draw(window);
-        RRed.draw(window);
-        RGrey.draw(window);
-        RTeal.draw(window);
+        for (auto& shape : shapes) {
+            shape->draw(window); 
+        }
 
 
 
