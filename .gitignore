@@ -4,3 +4,6 @@
 
 # Ignore folder called SFML3
 SFML3
+
+# Ignore the ini file of ImGui
+*.ini
