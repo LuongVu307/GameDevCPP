@@ -7,3 +7,6 @@ SFML3
 
 # Ignore the ini file of ImGui
 *.ini
+
+# Ignore test file
+*test.*
